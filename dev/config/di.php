@@ -3,86 +3,50 @@
  * Configuration file for DI container.
  */
 return [
-
     // Services to add to the container.
     "services" => [
+        "rem" => [
+            "shared" => true,
+            "callback" => function () {
+                $rem = new \Anax\RemServer\RemServer();
+                $rem->configure("remserver.php");
+                $rem->injectSession($this->get("session"));
+                return $rem;
+            }
+        ],
+        "remController" => [
+            "shared" => false,
+            "callback" => function () {
+                $rem = new \Anax\RemServer\RemServerController();
+                $rem->setDI($this);
+                return $rem;
+            }
+        ],
         "request" => [
             "shared" => true,
             "callback" => function () {
-                $obj = new \Anax\Request\Request();
-                $obj->init();
-                return $obj;
+                $request = new \Anax\Request\Request();
+                $request->init();
+                return $request;
             }
         ],
-        "response" => [
+        "session" => [
             "shared" => true,
-            //"callback" => "\Anax\Response\Response",
+            "active" => true,
             "callback" => function () {
-                $obj = new \Anax\Response\ResponseUtility();
-                $obj->setDI($this);
-                return $obj;
-            }
-        ],
-        "url" => [
-            "shared" => true,
-            "callback" => function () {
-                $obj = new \Anax\Url\Url();
-                $request = $this->get("request");
-                $obj->setSiteUrl($request->getSiteUrl());
-                $obj->setBaseUrl($request->getBaseUrl());
-                $obj->setStaticSiteUrl($request->getSiteUrl());
-                $obj->setStaticBaseUrl($request->getBaseUrl());
-                $obj->setScriptName($request->getScriptName());
-                $obj->configure("url.php");
-                $obj->setDefaultsFromConfiguration();
-                return $obj;
+                $session = new \Anax\Session\SessionConfigurable();
+                $session->configure("session.php");
+                $session->start();
+                return $session;
             }
         ],
         "router" => [
             "shared" => true,
             "callback" => function () {
-                $obj = new \Anax\Route\Router();
-                $obj->setDI($this);
-                $obj->configure("route.php");
-                return $obj;
-            }
-        ],
-        "view" => [
-            "shared" => true,
-            "callback" => function () {
-                $obj = new \Anax\View\ViewCollection();
-                $obj->setDI($this);
-                $obj->configure("view.php");
-                return $obj;
-            }
-        ],
-        "viewRenderFile" => [
-            "shared" => true,
-            "callback" => function () {
-                $obj = new \Anax\View\ViewRenderFile2();
-                $obj->setDI($this);
-                return $obj;
-            }
-        ],
-        "session" => [
-            "shared" => true,
-            "callback" => function () {
-                $obj = new \Anax\Session\SessionConfigurable();
-                $obj->configure("session.php");
-                $obj->start();
-                return $obj;
-            }
-        ],
-        "textfilter" => [
-            "shared" => true,
-            "callback" => "\Anax\TextFilter\TextFilter",
-        ],
-        "pageRender" => [
-            "shared" => true,
-            "callback" => function () {
-                $obj = new \Anax\Page\PageRender();
-                $obj->setDI($this);
-                return $obj;
+                $router = new \Anax\Route\Router();
+                $router->setDI($this);
+                $router->configure("route.php");
+                return $router;
             }
         ],
         "errorController" => [
@@ -93,18 +57,19 @@ return [
                 return $obj;
             }
         ],
-        "debugController" => [
+        "view" => [
             "shared" => true,
             "callback" => function () {
-                $obj = new \Anax\Page\DebugController();
-                $obj->setDI($this);
-                return $obj;
+                $view = new \Anax\View\ViewCollection();
+                $view->setDI($this);
+                $view->configure("view.php");
+                return $view;
             }
         ],
-        "flatFileContentController" => [
+        "pageRender" => [
             "shared" => true,
             "callback" => function () {
-                $obj = new \Anax\Page\FlatFileContentController();
+                $obj = new \Anax\Page\PageRender();
                 $obj->setDI($this);
                 return $obj;
             }
